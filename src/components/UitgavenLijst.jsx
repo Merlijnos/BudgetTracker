@@ -3,6 +3,7 @@ import { getFirestore, collection, query, where, onSnapshot, deleteDoc, doc} fro
 import { useAuth } from '../contexts/AuthContext';
 import UitgavenFilter from './UitgavenFilter';
 import ConfirmDialog from './ConfirmDialog';
+import UitgavenSortering from './UitgavenSortering';
 
 export default function UitgavenLijst() {
   const [uitgaven, setUitgaven] = useState([]);
@@ -18,6 +19,10 @@ export default function UitgavenLijst() {
   const [confirmDialog, setConfirmDialog] = useState({
     isOpen: false,
     uitgaveId: null
+  });
+  const [sorteerOptie, setSorteerOptie] = useState({
+    veld: 'datum',
+    richting: 'desc'
   });
 
   useEffect(() => {
@@ -82,10 +87,31 @@ export default function UitgavenLijst() {
     }
   };
 
+  const sorterenUitgaven = (uitgaven) => {
+    return [...uitgaven].sort((a, b) => {
+      let vergelijking;
+
+      switch (sorteerOptie.veld) {
+        case 'datum':
+          vergelijking = new Date(b.datum) - new Date(a.datum);
+          return sorteerOptie.richting === 'desc' ? vergelijking : -vergelijking;
+        case 'bedrag':
+          vergelijking = b.bedrag - a.bedrag;
+          return sorteerOptie.richting === 'desc' ? vergelijking : -vergelijking;
+        case 'categorie':
+          vergelijking = a.categorie.localeCompare(b.categorie);
+          return sorteerOptie.richting === 'desc' ? -vergelijking : vergelijking;
+        default:
+          return 0;
+      }
+    });
+  };
+
   return (
     <div className="uitgaven-lijst">
       <h2>Uitgaven Overzicht</h2>
       <UitgavenFilter filters={filters} setFilters={setFilters} />
+      <UitgavenSortering sorteerOptie={sorteerOptie} setSorteerOptie={setSorteerOptie} />
       
       <ConfirmDialog
         isOpen={confirmDialog.isOpen}
@@ -102,7 +128,7 @@ export default function UitgavenLijst() {
       ) : uitgaven.length === 0 ? (
         <p>Geen uitgaven gevonden.</p>
       ) : (
-        uitgaven.map((uitgave) => (
+        sorterenUitgaven(uitgaven).map((uitgave) => (
           <div key={uitgave.id} className="uitgave-item">
             <div className="uitgave-content">
               <p className="uitgave-bedrag">€{uitgave.bedrag.toFixed(2)} - {uitgave.beschrijving}</p>

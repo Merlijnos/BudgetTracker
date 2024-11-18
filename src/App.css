@@ -699,3 +699,21 @@ button:hover {
 .button-danger:hover {
   background-color: #d32f2f;
 }
+
+.sorteer-opties {
+  margin: 1rem 0;
+}
+
+.sorteer-opties select {
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--background);
+  min-width: 200px;
+}
+
+.sorteer-opties select:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--primary-light);
+}
