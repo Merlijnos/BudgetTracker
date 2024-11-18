@@ -78,28 +78,77 @@ export default function Statistieken() {
     laadStatistieken();
   }, [currentUser, db]);
 
-  const pieData = {
-    labels: Object.keys(uitgavenPerCategorie),
-    datasets: [{
-      data: Object.values(uitgavenPerCategorie),
-      backgroundColor: [
-        '#4299E1',
-        '#48BB78',
-        '#ED8936',
-        '#9F7AEA',
-        '#F56565'
-      ]
-    }]
+  const pieChartConfig = {
+    data: {
+      labels: Object.keys(uitgavenPerCategorie),
+      datasets: [{
+        data: Object.values(uitgavenPerCategorie),
+        backgroundColor: [
+          '#FF6384',
+          '#36A2EB',
+          '#FFCE56',
+          '#4BC0C0',
+          '#9966FF',
+          '#FF9F40'
+        ],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: {
+            padding: 20,
+            font: {
+              size: 12
+            }
+          }
+        },
+        title: {
+          display: true,
+          text: 'Uitgaven per Categorie',
+          font: {
+            size: 16
+          }
+        }
+      }
+    }
   };
 
-  const lineData = {
-    labels: Object.keys(uitgavenPerMaand).map(m => `Maand ${m}`),
-    datasets: [{
-      label: 'Uitgaven per maand',
-      data: Object.values(uitgavenPerMaand),
-      borderColor: '#4299E1',
-      tension: 0.1
-    }]
+  const lineChartConfig = {
+    data: {
+      labels: Object.keys(uitgavenPerMaand).map(maand => 
+        new Date(2024, parseInt(maand) - 1).toLocaleString('nl-NL', { month: 'long' })
+      ),
+      datasets: [{
+        label: 'Uitgaven per Maand',
+        data: Object.values(uitgavenPerMaand),
+        fill: false,
+        borderColor: '#36A2EB',
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'top',
+        },
+        title: {
+          display: true,
+          text: 'Uitgaven Trend'
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: value => `€${value}`
+          }
+        }
+      }
+    }
   };
 
   if (loading) return <div className="loading">Laden...</div>;
@@ -110,22 +159,26 @@ export default function Statistieken() {
       
       <div className="stats-grid">
         <div className="stats-card">
-          <h3>Uitgaven per Categorie</h3>
-          <Pie data={pieData} />
+          <Pie data={pieChartConfig.data} options={pieChartConfig.options} />
         </div>
         
         <div className="stats-card">
-          <h3>Uitgaven over Tijd</h3>
-          <Line data={lineData} />
+          <Line data={lineChartConfig.data} options={lineChartConfig.options} />
         </div>
 
         <div className="stats-card">
           <h3>Top 5 Uitgaven</h3>
-          <ul className="top-uitgaven">
+          <ul className="top-uitgaven-lijst">
             {topUitgaven.map((uitgave, index) => (
-              <li key={index}>
-                <span className="uitgave-beschrijving">{uitgave.beschrijving}</span>
-                <span className="uitgave-bedrag">€{uitgave.bedrag.toFixed(2)}</span>
+              <li key={index} className="top-uitgave-item">
+                <div className="uitgave-rang">{index + 1}</div>
+                <div className="uitgave-details">
+                  <span className="uitgave-beschrijving">{uitgave.beschrijving}</span>
+                  <span className="uitgave-meta">
+                    {new Date(uitgave.datum).toLocaleDateString('nl-NL')}
+                  </span>
+                </div>
+                <div className="uitgave-bedrag">€{uitgave.bedrag.toFixed(2)}</div>
               </li>
             ))}
           </ul>

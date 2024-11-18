@@ -25,6 +25,8 @@ export default function UitgavenLijst() {
     richting: 'desc'
   });
   const [zoekTerm, setZoekTerm] = useState('');
+  const [paginaGrootte] = useState(10);
+  const [huidigePagina, setHuidigePagina] = useState(1);
 
   useEffect(() => {
     if (!currentUser) return;
@@ -146,6 +148,12 @@ export default function UitgavenLijst() {
     );
   };
 
+  const pagineerUitgaven = (uitgaven) => {
+    const startIndex = (huidigePagina - 1) * paginaGrootte;
+    const eindIndex = startIndex + paginaGrootte;
+    return uitgaven.slice(startIndex, eindIndex);
+  };
+
   return (
     <div className="uitgaven-lijst">
       <h2>Uitgaven Overzicht</h2>
@@ -187,23 +195,47 @@ export default function UitgavenLijst() {
       ) : uitgaven.length === 0 ? (
         <p>Geen uitgaven gevonden.</p>
       ) : (
-        sorterenUitgaven(filterUitgaven(uitgaven)).map((uitgave) => (
-          <div key={uitgave.id} className="uitgave-item">
-            <div className="uitgave-content">
-              <p className="uitgave-bedrag">€{uitgave.bedrag.toFixed(2)} - {uitgave.beschrijving}</p>
-              <p className="uitgave-meta">
-                {new Date(uitgave.datum).toLocaleDateString('nl-NL')} | 
-                Categorie: {uitgave.categorie}
-              </p>
+        <>
+          {pagineerUitgaven(sorterenUitgaven(filterUitgaven(uitgaven))).map((uitgave) => (
+            <div key={uitgave.id} className="uitgave-item">
+              <div className="uitgave-content">
+                <p className="uitgave-bedrag">€{uitgave.bedrag.toFixed(2)} - {uitgave.beschrijving}</p>
+                <p className="uitgave-meta">
+                  {new Date(uitgave.datum).toLocaleDateString('nl-NL')} | 
+                  Categorie: {uitgave.categorie}
+                </p>
+              </div>
+              <button 
+                onClick={() => handleVerwijder(uitgave.id)}
+                className="verwijder-button"
+              >
+                Verwijderen
+              </button>
             </div>
+          ))}
+          
+          <div className="paginering">
             <button 
-              onClick={() => handleVerwijder(uitgave.id)}
-              className="verwijder-button"
+              onClick={() => setHuidigePagina(prev => Math.max(prev - 1, 1))}
+              disabled={huidigePagina === 1}
+              className="paginering-button"
             >
-              Verwijderen
+              Vorige
+            </button>
+            
+            <span className="pagina-info">
+              Pagina {huidigePagina} van {Math.ceil(filterUitgaven(uitgaven).length / paginaGrootte)}
+            </span>
+            
+            <button 
+              onClick={() => setHuidigePagina(prev => prev + 1)}
+              disabled={huidigePagina >= Math.ceil(filterUitgaven(uitgaven).length / paginaGrootte)}
+              className="paginering-button"
+            >
+              Volgende
             </button>
           </div>
-        ))
+        </>
       )}
     </div>
   );
