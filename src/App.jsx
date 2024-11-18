@@ -10,7 +10,6 @@ import Header from './components/Header';
 import UitgavenLijst from './components/UitgavenLijst';
 import Statistieken from './components/Statistieken';
 import Instellingen from './components/Instellingen';
-import UitgavenFilter from './components/UitgavenFilter';
 
 function App() {
   return (

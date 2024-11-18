@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getFirestore, collection, query, where, onSnapshot, deleteDoc, doc} from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import UitgavenFilter from './UitgavenFilter';
+import ConfirmDialog from './ConfirmDialog';
 
 export default function UitgavenLijst() {
   const [uitgaven, setUitgaven] = useState([]);
@@ -13,6 +14,10 @@ export default function UitgavenLijst() {
     maand: new Date().getMonth() + 1,
     jaar: new Date().getFullYear(),
     categorie: 'alle'
+  });
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    uitgaveId: null
   });
 
   useEffect(() => {
@@ -56,27 +61,24 @@ export default function UitgavenLijst() {
     return () => unsubscribe();
   }, [currentUser, db, filters]);
 
-  const verwijderUitgave = async (uitgaveId) => {
-    if (!currentUser) return;
+  const handleVerwijder = (uitgaveId) => {
+    setConfirmDialog({
+      isOpen: true,
+      uitgaveId
+    });
+  };
+
+  const verwijderUitgave = async () => {
+    if (!currentUser || !confirmDialog.uitgaveId) return;
     
     try {
       setError('');
-      const uitgaveRef = doc(db, 'uitgaven', uitgaveId);
+      const uitgaveRef = doc(db, 'uitgaven', confirmDialog.uitgaveId);
       await deleteDoc(uitgaveRef);
-      
-      const successMessage = document.createElement('div');
-      successMessage.className = 'success-message';
-      successMessage.textContent = 'Uitgave succesvol verwijderd';
-      document.querySelector('.uitgaven-lijst').prepend(successMessage);
-      setTimeout(() => {
-        if (successMessage.parentNode) {
-          successMessage.remove();
-        }
-      }, 3000);
+      setConfirmDialog({ isOpen: false, uitgaveId: null });
     } catch (error) {
       console.error('Fout bij verwijderen:', error);
       setError('Fout bij verwijderen uitgave.');
-      setTimeout(() => setError(''), 3000);
     }
   };
 
@@ -84,6 +86,14 @@ export default function UitgavenLijst() {
     <div className="uitgaven-lijst">
       <h2>Uitgaven Overzicht</h2>
       <UitgavenFilter filters={filters} setFilters={setFilters} />
+      
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        onClose={() => setConfirmDialog({ isOpen: false, uitgaveId: null })}
+        onConfirm={verwijderUitgave}
+        title="Uitgave Verwijderen"
+        message="Weet je zeker dat je deze uitgave wilt verwijderen?"
+      />
       
       {loading ? (
         <div className="loading">Laden...</div>
@@ -102,7 +112,7 @@ export default function UitgavenLijst() {
               </p>
             </div>
             <button 
-              onClick={() => verwijderUitgave(uitgave.id)}
+              onClick={() => handleVerwijder(uitgave.id)}
               className="verwijder-button"
             >
               Verwijderen
