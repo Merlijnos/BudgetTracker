@@ -24,6 +24,7 @@ export default function UitgavenLijst() {
     veld: 'datum',
     richting: 'desc'
   });
+  const [zoekTerm, setZoekTerm] = useState('');
 
   useEffect(() => {
     if (!currentUser) return;
@@ -107,11 +108,69 @@ export default function UitgavenLijst() {
     });
   };
 
+  const exporteerNaarCSV = () => {
+    if (uitgaven.length === 0) return;
+
+    const headers = ['Datum', 'Bedrag', 'Beschrijving', 'Categorie'];
+    const csvData = uitgaven.map(uitgave => [
+      new Date(uitgave.datum).toLocaleDateString('nl-NL'),
+      uitgave.bedrag.toFixed(2),
+      uitgave.beschrijving,
+      uitgave.categorie
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...csvData.map(row => row.join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `uitgaven_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const filterUitgaven = (uitgaven) => {
+    if (!zoekTerm) return uitgaven;
+    
+    const zoekTermLower = zoekTerm.toLowerCase();
+    return uitgaven.filter(uitgave => 
+      uitgave.beschrijving.toLowerCase().includes(zoekTermLower) ||
+      uitgave.categorie.toLowerCase().includes(zoekTermLower) ||
+      uitgave.bedrag.toString().includes(zoekTermLower)
+    );
+  };
+
   return (
     <div className="uitgaven-lijst">
       <h2>Uitgaven Overzicht</h2>
       <UitgavenFilter filters={filters} setFilters={setFilters} />
-      <UitgavenSortering sorteerOptie={sorteerOptie} setSorteerOptie={setSorteerOptie} />
+      
+      <div className="zoek-balk">
+        <input
+          type="text"
+          placeholder="Zoek in uitgaven..."
+          value={zoekTerm}
+          onChange={(e) => setZoekTerm(e.target.value)}
+          className="zoek-input"
+        />
+      </div>
+
+      <div className="uitgaven-acties">
+        <UitgavenSortering sorteerOptie={sorteerOptie} setSorteerOptie={setSorteerOptie} />
+        <button 
+          onClick={exporteerNaarCSV}
+          className="exporteer-button"
+          disabled={uitgaven.length === 0}
+        >
+          Exporteer naar CSV
+        </button>
+      </div>
       
       <ConfirmDialog
         isOpen={confirmDialog.isOpen}
@@ -128,7 +187,7 @@ export default function UitgavenLijst() {
       ) : uitgaven.length === 0 ? (
         <p>Geen uitgaven gevonden.</p>
       ) : (
-        sorterenUitgaven(uitgaven).map((uitgave) => (
+        sorterenUitgaven(filterUitgaven(uitgaven)).map((uitgave) => (
           <div key={uitgave.id} className="uitgave-item">
             <div className="uitgave-content">
               <p className="uitgave-bedrag">€{uitgave.bedrag.toFixed(2)} - {uitgave.beschrijving}</p>

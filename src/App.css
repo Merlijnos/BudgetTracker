@@ -717,3 +717,27 @@ button:hover {
   outline: none;
   box-shadow: 0 0 0 2px var(--primary-light);
 }
+
+.zoek-balk {
+  margin: 1rem 0;
+}
+
+.zoek-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 1rem;
+  background-color: var(--background);
+  color: var(--text);
+}
+
+.zoek-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+.zoek-input::placeholder {
+  color: var(--text-light);
+}
