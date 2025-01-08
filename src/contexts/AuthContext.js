@@ -5,7 +5,9 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  sendPasswordResetEmail,
+  sendEmailVerification
 } from 'firebase/auth';
 
 const AuthContext = createContext();
@@ -17,22 +19,50 @@ export function useAuth() {
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   function signup(email, password) {
-    return createUserWithEmailAndPassword(auth, email, password);
+    return createUserWithEmailAndPassword(auth, email, password)
+      .then(async (userCredential) => {
+        await sendEmailVerification(userCredential.user);
+        return userCredential;
+      })
+      .catch((error) => {
+        setError(error.message);
+        throw error;
+      });
   }
 
   function login(email, password) {
-    return signInWithEmailAndPassword(auth, email, password);
+    return signInWithEmailAndPassword(auth, email, password)
+      .catch((error) => {
+        setError(error.message);
+        throw error;
+      });
   }
 
   function logout() {
-    return signOut(auth);
+    return signOut(auth)
+      .catch((error) => {
+        setError(error.message);
+        throw error;
+      });
+  }
+
+  function resetPassword(email) {
+    return sendPasswordResetEmail(auth, email)
+      .catch((error) => {
+        setError(error.message);
+        throw error;
+      });
   }
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
+      setLoading(false);
+    }, (error) => {
+      setError(error.message);
       setLoading(false);
     });
 
@@ -43,7 +73,9 @@ export function AuthProvider({ children }) {
     currentUser,
     signup,
     login,
-    logout
+    logout,
+    resetPassword,
+    error
   };
 
   return (
