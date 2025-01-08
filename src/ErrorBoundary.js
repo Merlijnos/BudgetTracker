@@ -1,11 +1,16 @@
 // src/ErrorBoundary.js
 import React from 'react';
-import * as Sentry from "@sentry/react";
+import PropTypes from 'prop-types';
+import './ErrorBoundary.css';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { 
+      hasError: false,
+      error: null,
+      errorInfo: null 
+    };
   }
 
   static getDerivedStateFromError(error) {
@@ -13,19 +18,31 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    // Log to Sentry
-    Sentry.captureException(error, { extra: errorInfo });
+    console.error("Uncaught error:", error, errorInfo);
+    
+    this.setState({ 
+      error: error,
+      errorInfo: errorInfo 
+    });
   }
 
   render() {
     if (this.state.hasError) {
       return (
         <div className="error-fallback">
-          <h1>Something went wrong.</h1>
-          <p>We've logged the error and our team will investigate.</p>
+          <h1>Oops! Something Went Wrong</h1>
+          <p>We apologize for the inconvenience. Our team has been notified, and we&apos;re working to resolve the issue.</p>
           <button onClick={() => window.location.reload()}>
             Reload Application
           </button>
+          {process.env.NODE_ENV === 'development' && this.state.errorInfo && (
+            <details>
+              <summary>Error Details</summary>
+              {this.state.error && this.state.error.toString()}
+              <br />
+              {this.state.errorInfo.componentStack}
+            </details>
+          )}
         </div>
       );
     }
@@ -33,5 +50,9 @@ class ErrorBoundary extends React.Component {
     return this.props.children;
   }
 }
+
+ErrorBoundary.propTypes = {
+  children: PropTypes.node.isRequired
+};
 
 export default ErrorBoundary;
