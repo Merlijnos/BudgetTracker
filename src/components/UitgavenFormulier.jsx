@@ -96,6 +96,9 @@ export default function UitgavenFormulier() {
           onChange={(e) => setCategorie(e.target.value)}
         >
           <option value="boodschappen">🛒 Boodschappen</option>
+          <option value="wonen">🏠 Wonen</option>
+          <option value="dienst">💼 Dienst</option>
+          <option value="sport">⚽ Sport</option>
           <option value="transport">🚗 Transport</option>
           <option value="entertainment">🎮 Entertainment</option>
           <option value="overig">📦 Overig</option>

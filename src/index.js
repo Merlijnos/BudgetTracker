@@ -4,7 +4,6 @@ import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 import App from './App';
 import ErrorBoundary from './ErrorBoundary';
-import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -16,6 +15,3 @@ root.render(
     </BrowserRouter>
   </React.StrictMode>
 );
-
-// Optional: Measure performance
-reportWebVitals(console.log);
