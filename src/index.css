@@ -13,3 +13,170 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+:root {
+  --primary-color: #3498db;
+  --secondary-color: #2ecc71;
+  --background-color: #f4f6f7;
+  --text-color: #2c3e50;
+  --error-color: #e74c3c;
+
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  
+  --spacing-small: 0.5rem;
+  --spacing-medium: 1rem;
+  --spacing-large: 1.5rem;
+
+  --transition-speed: 0.3s;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  transition: all var(--transition-speed) ease;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--background-color);
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+button, a, .interactive {
+  transition: 
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+button:hover, a:hover, .interactive:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Add to src/index.css */
+:root {
+  /* Existing variables... */
+  --animation-curve-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced Animations */
+@keyframes slideInFromBottom {
+  0% {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInAndScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes subtleHover {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s var(--animation-curve-ease-in-out);
+}
+
+.slide-in-bottom {
+  animation: slideInFromBottom 0.6s var(--animation-curve-ease-in-out);
+}
+
+.scale-in {
+  animation: fadeInAndScale 0.4s var(--animation-curve-ease-in-out);
+}
+
+.hover-lift {
+  transition: transform 0.3s var(--animation-curve-ease-in-out);
+}
+
+.hover-lift:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.pulse-effect {
+  animation: pulse 1.5s infinite var(--animation-curve-ease-in-out);
+}
+
+.shimmer-effect {
+  background: linear-gradient(
+    to right, 
+    #f0f0f0 0%, 
+    #e0e0e0 50%, 
+    #f0f0f0 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+}
+
+/* Interactive Elements */
+button, .interactive-element {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s var(--animation-curve-ease-in-out);
+}
+
+button::before, .interactive-element::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    120deg, 
+    transparent, 
+    rgba(255,255,255,0.3), 
+    transparent
+  );
+  transition: all 0.5s var(--animation-curve-ease-in-out);
+}
+
+button:hover::before, .interactive-element:hover::before {
+  left: 100%;
+}
+
+/* Responsive Animations */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
