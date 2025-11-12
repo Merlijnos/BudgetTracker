@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { getFirestore, collection, query, where, onSnapshot, deleteDoc, doc} from 'firebase/firestore';
+import { collection, query, where, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
+import { db } from '../firebase';
 import UitgavenFilter from './UitgavenFilter';
 import ConfirmDialog from './ConfirmDialog';
 import UitgavenSortering from './UitgavenSortering';
@@ -10,7 +11,6 @@ export default function UitgavenLijst() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { currentUser } = useAuth();
-  const db = getFirestore();
   const [filters, setFilters] = useState({
     maand: new Date().getMonth() + 1,
     jaar: new Date().getFullYear(),
@@ -48,26 +48,19 @@ export default function UitgavenLijst() {
     const q = query(uitgavenRef, ...queryConstraints);
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      try {
-        const nieuweUitgaven = snapshot.docs
-          .map(doc => ({
-            id: doc.id,
-            ...doc.data()
-          }))
-          .sort((a, b) => new Date(b.datum) - new Date(a.datum));
+      const nieuweUitgaven = snapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }))
+        .sort((a, b) => new Date(b.datum) - new Date(a.datum));
 
-        setUitgaven(nieuweUitgaven);
-        setLoading(false);
-        setError('');
-      } catch (err) {
-        console.error('Fout bij verwerken data:', err);
-        setError('Fout bij verwerken uitgaven.');
-        setLoading(false);
-      }
+      setUitgaven(nieuweUitgaven);
+      setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [currentUser, db, filters]);
+  }, [currentUser, filters]);
 
   const handleVerwijder = (uitgaveId) => {
     setConfirmDialog({
@@ -80,13 +73,10 @@ export default function UitgavenLijst() {
     if (!currentUser || !confirmDialog.uitgaveId) return;
     
     try {
-      setError('');
-      const uitgaveRef = doc(db, 'uitgaven', confirmDialog.uitgaveId);
-      await deleteDoc(uitgaveRef);
+      await deleteDoc(doc(db, 'uitgaven', confirmDialog.uitgaveId));
       setConfirmDialog({ isOpen: false, uitgaveId: null });
     } catch (error) {
-      console.error('Fout bij verwijderen:', error);
-      setError('Fout bij verwijderen uitgave.');
+      setError('Fout bij verwijderen uitgave');
     }
   };
 

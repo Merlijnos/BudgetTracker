@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { getFirestore, collection, query, where, onSnapshot, doc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
+import { db } from '../firebase';
 
 export default function DashboardOverview() {
   const [totalen, setTotalen] = useState({
@@ -13,7 +14,6 @@ export default function DashboardOverview() {
   });
   const [loading, setLoading] = useState(true);
   const { currentUser } = useAuth();
-  const db = getFirestore();
 
   useEffect(() => {
     if (!currentUser) return;
@@ -60,7 +60,7 @@ export default function DashboardOverview() {
     return () => {
       unsubscribeInstellingen();
     };
-  }, [currentUser, db]);
+  }, [currentUser]);
 
   if (loading) return <div className="loading">Laden...</div>;
 

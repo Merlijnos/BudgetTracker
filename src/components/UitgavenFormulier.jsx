@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
+import { db } from '../firebase';
 
 export default function UitgavenFormulier() {
   const [bedrag, setBedrag] = useState('');
@@ -9,32 +10,21 @@ export default function UitgavenFormulier() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const { currentUser } = useAuth();
-  const db = getFirestore();
 
   const uitgaveToevoegen = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess(false);
     
-    if (!currentUser) {
-      setError('Je moet ingelogd zijn om uitgaven toe te voegen.');
+    const bedragNum = parseFloat(bedrag);
+    if (isNaN(bedragNum) || bedragNum <= 0 || !beschrijving.trim()) {
+      setError('Voer geldige gegevens in');
       return;
     }
 
     try {
-      const bedragNum = parseFloat(bedrag);
-      if (isNaN(bedragNum) || bedragNum <= 0) {
-        setError('Voer een geldig bedrag in');
-        return;
-      }
-
-      if (!beschrijving.trim()) {
-        setError('Voer een beschrijving in');
-        return;
-      }
-
       const now = new Date();
-      const uitgave = {
+      await addDoc(collection(db, 'uitgaven'), {
         bedrag: bedragNum,
         beschrijving: beschrijving.trim(),
         categorie,
@@ -42,31 +32,16 @@ export default function UitgavenFormulier() {
         datum: now.toISOString(),
         maand: now.getMonth() + 1,
         jaar: now.getFullYear()
-      };
+      });
 
-      const uitgavenRef = collection(db, 'uitgaven');
-      const docRef = await addDoc(uitgavenRef, uitgave);
-      
-      if (!docRef.id) {
-        throw new Error('Geen document ID ontvangen');
-      }
-
-      // Reset form
       setBedrag('');
       setBeschrijving('');
       setCategorie('boodschappen');
       setSuccess(true);
       
-      setTimeout(() => {
-        setSuccess(false);
-      }, 3000);
+      setTimeout(() => setSuccess(false), 3000);
     } catch (error) {
-      console.error('Fout bij toevoegen uitgave:', error);
-      if (error.code === 'permission-denied') {
-        setError('Je hebt geen toegang om uitgaven toe te voegen.');
-      } else {
-        setError('Er is iets misgegaan bij het toevoegen van de uitgave. Probeer het opnieuw.');
-      }
+      setError('Fout bij toevoegen uitgave');
     }
   };
 

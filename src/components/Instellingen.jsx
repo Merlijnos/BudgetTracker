@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
+import { db } from '../firebase';
 
 export default function Instellingen() {
   const [maandelijksBudget, setMaandelijksBudget] = useState('2000');
@@ -8,7 +9,6 @@ export default function Instellingen() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const { currentUser } = useAuth();
-  const db = getFirestore();
 
   useEffect(() => {
     const laadInstellingen = async () => {
@@ -22,14 +22,10 @@ export default function Instellingen() {
         if (instellingenDoc.exists()) {
           setMaandelijksBudget(instellingenDoc.data().maandelijksBudget.toString());
         } else {
-          // Maak een nieuw instellingen document aan als het nog niet bestaat
-          await setDoc(instellingenRef, {
-            maandelijksBudget: 2000
-          });
+          await setDoc(instellingenRef, { maandelijksBudget: 2000 });
         }
         setError('');
       } catch (error) {
-        console.error('Fout bij laden instellingen:', error);
         setError('Kon instellingen niet laden');
       } finally {
         setLoading(false);
@@ -37,7 +33,7 @@ export default function Instellingen() {
     };
 
     laadInstellingen();
-  }, [currentUser, db]);
+  }, [currentUser]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -51,16 +47,13 @@ export default function Instellingen() {
         return;
       }
 
-      const instellingenRef = doc(db, 'gebruikersinstellingen', currentUser.uid);
-      await setDoc(instellingenRef, {
-        maandelijksBudget: budget,
-        laatstBijgewerkt: serverTimestamp()
+      await setDoc(doc(db, 'gebruikersinstellingen', currentUser.uid), {
+        maandelijksBudget: budget
       }, { merge: true });
 
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (error) {
-      console.error('Fout bij opslaan instellingen:', error);
       setError('Kon instellingen niet opslaan');
     }
   };

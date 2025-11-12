@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
+import { db } from '../firebase';
 import { Pie, Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -31,7 +32,6 @@ export default function Statistieken() {
   const [topUitgaven, setTopUitgaven] = useState([]);
   const [loading, setLoading] = useState(true);
   const { currentUser } = useAuth();
-  const db = getFirestore();
 
   useEffect(() => {
     const laadStatistieken = async () => {
@@ -48,19 +48,16 @@ export default function Statistieken() {
         const snapshot = await getDocs(q);
         const uitgaven = snapshot.docs.map(doc => doc.data());
 
-        // Bereken uitgaven per categorie
         const perCategorie = uitgaven.reduce((acc, uitgave) => {
           acc[uitgave.categorie] = (acc[uitgave.categorie] || 0) + uitgave.bedrag;
           return acc;
         }, {});
 
-        // Bereken uitgaven per maand
         const perMaand = uitgaven.reduce((acc, uitgave) => {
           acc[uitgave.maand] = (acc[uitgave.maand] || 0) + uitgave.bedrag;
           return acc;
         }, {});
 
-        // Vind top uitgaven
         const top = [...uitgaven]
           .sort((a, b) => b.bedrag - a.bedrag)
           .slice(0, 5);
@@ -70,13 +67,12 @@ export default function Statistieken() {
         setTopUitgaven(top);
         setLoading(false);
       } catch (error) {
-        console.error('Fout bij laden statistieken:', error);
         setLoading(false);
       }
     };
 
     laadStatistieken();
-  }, [currentUser, db]);
+  }, [currentUser]);
 
   const pieChartConfig = {
     data: {

@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 
 export default function UitgavenSortering({ sorteerOptie, setSorteerOptie }) {
   return (
@@ -21,11 +20,3 @@ export default function UitgavenSortering({ sorteerOptie, setSorteerOptie }) {
     </div>
   );
 }
-
-UitgavenSortering.propTypes = {
-  sorteerOptie: PropTypes.shape({
-    veld: PropTypes.oneOf(['datum', 'bedrag', 'categorie']).isRequired,
-    richting: PropTypes.oneOf(['asc', 'desc']).isRequired
-  }).isRequired,
-  setSorteerOptie: PropTypes.func.isRequired
-}; 

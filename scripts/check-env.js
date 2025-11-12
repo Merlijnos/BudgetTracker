@@ -1,4 +1,23 @@
 // scripts/check-env.js
+const fs = require('fs');
+const path = require('path');
+
+// Load .env file manually
+const envPath = path.join(__dirname, '..', '.env');
+if (fs.existsSync(envPath)) {
+  const envConfig = fs.readFileSync(envPath, 'utf8');
+  envConfig.split('\n').forEach(line => {
+    const match = line.match(/^([^#=]+)=(.*)$/);
+    if (match) {
+      const key = match[1].trim();
+      const value = match[2].trim();
+      if (key && !process.env[key]) {
+        process.env[key] = value;
+      }
+    }
+  });
+}
+
 const requiredEnvVars = [
     'REACT_APP_FIREBASE_API_KEY',
     'REACT_APP_FIREBASE_AUTH_DOMAIN',

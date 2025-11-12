@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 
 export default function UitgavenFilter({ filters, setFilters }) {
   const categorieën = [
@@ -94,15 +93,3 @@ export default function UitgavenFilter({ filters, setFilters }) {
     </div>
   );
 }
-
-UitgavenFilter.propTypes = {
-  filters: PropTypes.shape({
-    maand: PropTypes.oneOfType([
-      PropTypes.number,
-      PropTypes.string
-    ]).isRequired,
-    jaar: PropTypes.number.isRequired,
-    categorie: PropTypes.string.isRequired
-  }).isRequired,
-  setFilters: PropTypes.func.isRequired
-};

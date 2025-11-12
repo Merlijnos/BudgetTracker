@@ -1,5 +1,4 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { auth } from '../firebase';
 import {
   createUserWithEmailAndPassword,
@@ -19,50 +18,27 @@ export function useAuth() {
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   function signup(email, password) {
     return createUserWithEmailAndPassword(auth, email, password)
-      .then(async (userCredential) => {
-        await sendEmailVerification(userCredential.user);
-        return userCredential;
-      })
-      .catch((error) => {
-        setError(error.message);
-        throw error;
-      });
+      .then((userCredential) => sendEmailVerification(userCredential.user));
   }
 
   function login(email, password) {
-    return signInWithEmailAndPassword(auth, email, password)
-      .catch((error) => {
-        setError(error.message);
-        throw error;
-      });
+    return signInWithEmailAndPassword(auth, email, password);
   }
 
   function logout() {
-    return signOut(auth)
-      .catch((error) => {
-        setError(error.message);
-        throw error;
-      });
+    return signOut(auth);
   }
 
   function resetPassword(email) {
-    return sendPasswordResetEmail(auth, email)
-      .catch((error) => {
-        setError(error.message);
-        throw error;
-      });
+    return sendPasswordResetEmail(auth, email);
   }
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
-      setLoading(false);
-    }, (error) => {
-      setError(error.message);
       setLoading(false);
     });
 
@@ -74,8 +50,7 @@ export function AuthProvider({ children }) {
     signup,
     login,
     logout,
-    resetPassword,
-    error
+    resetPassword
   };
 
   return (
@@ -84,7 +59,3 @@ export function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
-
-AuthProvider.propTypes = {
-  children: PropTypes.node.isRequired
-};

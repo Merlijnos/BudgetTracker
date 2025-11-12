@@ -1,6 +1,5 @@
 // src/ErrorBoundary.js
 import React from 'react';
-import PropTypes from 'prop-types';
 import './ErrorBoundary.css';
 
 class ErrorBoundary extends React.Component {
@@ -8,22 +7,16 @@ class ErrorBoundary extends React.Component {
     super(props);
     this.state = { 
       hasError: false,
-      error: null,
       errorInfo: null 
     };
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError() {
     return { hasError: true };
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error("Uncaught error:", error, errorInfo);
-    
-    this.setState({ 
-      error: error,
-      errorInfo: errorInfo 
-    });
+    this.setState({ errorInfo });
   }
 
   render() {
@@ -38,8 +31,6 @@ class ErrorBoundary extends React.Component {
           {process.env.NODE_ENV === 'development' && this.state.errorInfo && (
             <details>
               <summary>Error Details</summary>
-              {this.state.error && this.state.error.toString()}
-              <br />
               {this.state.errorInfo.componentStack}
             </details>
           )}
@@ -50,9 +41,5 @@ class ErrorBoundary extends React.Component {
     return this.props.children;
   }
 }
-
-ErrorBoundary.propTypes = {
-  children: PropTypes.node.isRequired
-};
 
 export default ErrorBoundary;
